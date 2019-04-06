@@ -603,6 +603,39 @@ class ZWaveClassifier {
       this.addConfigList(node, 1, 'Touch Sounds');
       this.addConfigList(node, 2, 'Touch Vibration');
       this.addConfigColorRGBX(node, 5, 'Touch Color');
+    } else if (sceneCount > 2) {
+      // for other devices add a convenience property for each scene, we
+      // assume short press is on, long press is off.
+
+      node.sceneProperty = [];
+      for (let buttonNum = 1; buttonNum <= sceneCount; buttonNum++) {
+        const valueId = node.findValueId(COMMAND_CLASS.CENTRAL_SCENE, 1, buttonNum);
+        const buttonLabel = valueId ?
+          node.zwValues[valueId].label :
+          `${buttonNum}`;
+
+        const onProperty = this.addProperty(
+          node,                     // node
+          `on${buttonLabel}`,       // name
+          {                         // property decscription
+            '@type': 'BooleanProperty',
+            label: `On/Off ${buttonLabel}`,
+            type: 'boolean',
+            readOnly: true,
+          },
+          null                      // valueId
+        );
+        onProperty.value = false;
+
+        const sceneProperty = this.addCentralSceneProperty(node, {
+          buttonNum: buttonNum,
+          label: buttonLabel,
+          pressAction: 'on',
+          releaseAction: 'off',
+          onProperty: onProperty,
+        });
+        node.sceneProperty[buttonNum] = sceneProperty;
+      }
     }
   }
 

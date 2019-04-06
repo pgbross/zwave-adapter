@@ -189,9 +189,23 @@ class ZWaveNode extends Device {
         break;
       case 2:   // released (long press)
         DEBUG && console.log('handleCentralSceneProperty: release',
-                             'moveDir:', sceneProperty.info.moveDir);
+                             'moveDir:', sceneProperty.info.moveDir,
+                             'releaseAction:', sceneProperty.info.releaseAction);
         if (sceneProperty.info.moveDir) {
           this.handleCentralSceneButtonStopCommand(levelProperty);
+        }
+        if (sceneProperty.info.releaseAction) {
+          switch (sceneProperty.info.releaseAction) {
+            case 'on':
+              this.setPropertyValue(onProperty, true);
+              break;
+            case 'off':
+              this.setPropertyValue(onProperty, false);
+              break;
+            case 'toggle':
+              this.setPropertyValue(onProperty, !onProperty.value);
+              break;
+          }
         }
         this.notifyEvent(`${buttonNum}-released`);
         sceneProperty.longPressed = false;
